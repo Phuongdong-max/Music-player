@@ -108,24 +108,58 @@ header h2 {
   background-color: var(--primary-color);
 }
 
+/* Time played */
+
+.time-played {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.time-played.hidden {
+  opacity: 0;
+}
+
+.time-played-start {
+}
+
+.time-played-remaining {
+}
+
+/* Progress */
+
 .progress {
   width: 100%;
   -webkit-appearance: none;
   height: 6px;
-  background: #d3d3d3;
+  background: linear-gradient(
+    90deg,
+    rgb(219, 219, 219) 60%,
+    rgb(219, 219, 219) 60%
+  );
+  box-shadow: inset 0px 0px 4px rgba(0, 0, 0, 0.2);
   outline: none;
   opacity: 0.7;
   -webkit-transition: 0.2s;
   transition: opacity 0.2s;
+  border-radius: 25px;
+}
+
+.progress:hover {
+  opacity: 1;
 }
 
 .progress::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 12px;
-  height: 6px;
-  background-color: var(--primary-color);
+  width: 20px;
+  height: 20px;
+  background: var(--primary-color);
+  border-radius: 50%;
   cursor: pointer;
+  border: 1px solid #333;
 }
 
 /* PLAYLIST */

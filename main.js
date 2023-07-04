@@ -10,6 +10,9 @@ const audio = $("#audio");
 const cd = $(".cd");
 const playBtn = $(".btn-toggle-play");
 const progress = $("#progress");
+const timePlayed = $(".time-played");
+const timePlayedStart = $("#time-played-start");
+const timePlayedRemaining = $("#time-played-remaining");
 const nextBtn = $(".btn-next");
 const prevBtn = $(".btn-prev");
 const randomBtn = $(".btn-random");
@@ -106,7 +109,6 @@ const app = {
       iterations: Infinity,
     });
     cdThumbAnimate.pause();
-    console.log(cdThumbAnimate);
 
     // Scroll CD
     document.onscroll = function () {
@@ -145,11 +147,52 @@ const app = {
           progress.value = progressPercent;
         }
       };
-      // Processing when rewinding music
-      progress.onchage = function (e) {
+      // Processing Time played
+
+      function updateTimePlayed() {
+        timePlayedStart.textContent = `${Math.floor(
+          audio.duration / 60
+        )}:${Math.floor(audio.duration % 60)
+          .toString()
+          .padStart(2, "0")}`;
+
+        timePlayedRemaining.textContent = `-${Math.floor(
+          (audio.duration - audio.currentTime) / 60
+        )}:${Math.floor((audio.duration - audio.currentTime) % 60)
+          .toString()
+          .padStart(2, "0")}`;
+      }
+      audio.addEventListener("timeupdate", updateTimePlayed);
+
+      function updateProgressBar() {
+        const color = `linear-gradient(
+          90deg,
+          rgb(235, 30, 85) ${progress.value}%,
+          rgb(219, 219, 219) ${progress.value}%
+        )`;
+        progress.style.background = color;
+      }
+      progress.addEventListener("input", updateProgressBar);
+
+      // Scroll Time Played
+
+      document.addEventListener("scroll", function () {
+        const scrollPosition =
+          window.scrollY || document.documentElement.scrollTop;
+        const cdHeight = cdThumb.offsetHeight;
+        if (scrollPosition < cdHeight) {
+          timePlayed.classList.remove("hidden");
+        } else {
+          timePlayed.classList.add("hidden");
+        }
+      });
+
+      // Processing when Seek music
+      progress.oninput = function (e) {
         const seekTime = (audio.duration / 100) * e.target.value;
         audio.currentTime = seekTime;
       };
+
       // When next song
       nextBtn.onclick = function () {
         if (_this.isRandom) {
@@ -174,7 +217,7 @@ const app = {
         _this.render();
         _this.scrollToActiveSong();
       };
-      // Processing when click random song
+      // Processing random song
       randomBtn.onclick = function (e) {
         _this.isRandom = !_this.isRandom;
         _this.setConfig("isRandom", _this.isRandom);
