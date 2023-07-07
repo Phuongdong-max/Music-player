@@ -1,3 +1,6 @@
+import { trackInfo } from "./getapi.js";
+
+console.log(trackInfo);
 const $ = document.querySelector.bind(document);
 const $$ = document.querySelectorAll.bind(document);
 const PLAYER_STORAGE_KEY = "key_player";
@@ -17,6 +20,7 @@ const nextBtn = $(".btn-next");
 const prevBtn = $(".btn-prev");
 const randomBtn = $(".btn-random");
 const repeatBtn = $(".btn-repeat");
+const volumeBar = $("#volume-bar");
 
 const app = {
   currentIndex: 0,
@@ -24,44 +28,7 @@ const app = {
   isRandom: false,
   isRepeat: false,
   config: JSON.parse(localStorage.getItem(PLAYER_STORAGE_KEY)) || {},
-  songs: [
-    {
-      name: "Harley Bird - Home",
-      singer: "Jordan Schor",
-      image: "https://cdn.jsdelivr.net/gh/ngylduy/storage/image/music-1.jpg",
-      path: "https://ia801400.us.archive.org/27/items/music_20210917/music-1.mp3",
-    },
-    {
-      name: "Ikson Anywhere – Ikson",
-      singer: "Audio Library",
-      image: "https://cdn.jsdelivr.net/gh/ngylduy/storage/image/music-2.jpg",
-      path: "https://ia801400.us.archive.org/27/items/music_20210917/music-2.mp3",
-    },
-    {
-      name: "Beauz & Jvna - Crazy",
-      singer: "Beauz & Jvna",
-      image: "https://cdn.jsdelivr.net/gh/ngylduy/storage/image/music-3.jpg",
-      path: "https://ia801400.us.archive.org/27/items/music_20210917/music-3.mp3",
-    },
-    {
-      name: "Hardwind - Want Me",
-      singer: "Mike Archangelo",
-      image: "https://cdn.jsdelivr.net/gh/ngylduy/storage/image/music-4.jpg",
-      path: "https://ia801400.us.archive.org/27/items/music_20210917/music-4.mp3",
-    },
-    {
-      name: "Jim - Sun Goes Down",
-      singer: "Jim Yosef x Roy",
-      image: "https://cdn.jsdelivr.net/gh/ngylduy/storage/image/music-5.jpg",
-      path: "https://ia801400.us.archive.org/27/items/music_20210917/music-5.mp3",
-    },
-    {
-      name: "Lost Sky - Vision NCS",
-      singer: "NCS Release",
-      image: "https://cdn.jsdelivr.net/gh/ngylduy/storage/image/music-6.jpg",
-      path: "https://ia801400.us.archive.org/27/items/music_20210917/music-6.mp3",
-    },
-  ],
+  songs: trackInfo,
 
   setConfig: function (key, value) {
     this.config[key] = value;
@@ -76,13 +43,13 @@ const app = {
             <div
                 class="thumb"
                 style="
-                background-image: url('${song.image}');
+                background-image: url('${song.coverImage}');
                 "
                 >
             </div>
             <div class="body">
-                <h3 class="title">${song.name}</h3>
-                <p class="author">${song.singer}</p>
+                <h3 class="title">${song.songTitle}</h3>
+                <p class="author">${song.artistName}</p>
             </div>
             <div class="option">
                 <i class="fas fa-ellipsis-h"></i>
@@ -100,7 +67,7 @@ const app = {
     });
   },
   handleEvents: function () {
-    _this = this;
+    const _this = this;
     const cdWidth = cd.offsetWidth;
 
     // CD spin
@@ -138,6 +105,7 @@ const app = {
         player.classList.remove("playing");
         cdThumbAnimate.pause();
       };
+
       // When audio is changing
       audio.ontimeupdate = function () {
         if (audio.duration) {
@@ -147,30 +115,38 @@ const app = {
           progress.value = progressPercent;
         }
       };
+
       // Processing Time played
-
       function updateTimePlayed() {
-        timePlayedStart.textContent = `${Math.floor(
-          audio.duration / 60
-        )}:${Math.floor(audio.duration % 60)
-          .toString()
-          .padStart(2, "0")}`;
+        const currentTime = audio.currentTime;
+        const duration = audio.duration;
 
-        timePlayedRemaining.textContent = `-${Math.floor(
-          (audio.duration - audio.currentTime) / 60
-        )}:${Math.floor((audio.duration - audio.currentTime) % 60)
-          .toString()
-          .padStart(2, "0")}`;
+        timePlayedStart.textContent = formatTime(currentTime);
+        timePlayedRemaining.textContent = formatTime(duration - currentTime);
+
+        updateProgressBar();
       }
+
+      // Format time as mm:ss
+      function formatTime(time) {
+        const minutes = Math.floor(time / 60);
+        const seconds = Math.floor(time % 60)
+          .toString()
+          .padStart(2, "0");
+        return `${minutes}:${seconds}`;
+      }
+
       audio.addEventListener("timeupdate", updateTimePlayed);
 
       function updateProgressBar() {
         const color = `linear-gradient(
           90deg,
-          rgb(235, 30, 85) ${progress.value}%,
+          rgb(39, 174, 96) ${progress.value}%,
           rgb(219, 219, 219) ${progress.value}%
         )`;
         progress.style.background = color;
+
+        const seekTime = (audio.duration / 100) * progress.value;
       }
       progress.addEventListener("input", updateProgressBar);
 
@@ -223,8 +199,8 @@ const app = {
         _this.setConfig("isRandom", _this.isRandom);
         randomBtn.classList.toggle("active", _this.isRandom);
       };
-      // Processing Repeat song
 
+      // Processing Repeat song
       repeatBtn.onclick = function (e) {
         _this.isRepeat = !_this.isRepeat;
         _this.setConfig("isRepeat", _this.isRepeat);
@@ -253,6 +229,18 @@ const app = {
           //Processing when click on song option
         }
       };
+      // Volume bar
+      volumeBar.addEventListener("input", function () {
+        const VolumeValue = volumeBar.value / 100;
+        audio.volume = VolumeValue;
+        const color = `linear-gradient(
+          90deg,
+          rgb(39, 174, 96) ${volumeBar.value}%,
+          rgb(219, 219, 219) ${volumeBar.value}%
+        )`;
+        volumeBar.style.background = color;
+        console.log(volumeBar.style);
+      });
     };
   },
   scrollToActiveSong: function () {
@@ -265,9 +253,9 @@ const app = {
   },
 
   loadCurrentSong: function () {
-    heading.textContent = this.currentSong.name;
-    cdThumb.style.backgroundImage = `url('${this.currentSong.image}')`;
-    audio.src = this.currentSong.path;
+    heading.textContent = this.currentSong.songTitle;
+    cdThumb.style.backgroundImage = `url('${this.currentSong.coverImage}')`;
+    audio.src = this.currentSong.songLink;
   },
   loadConfig: function () {
     this.isRandom = this.config.isRandom;

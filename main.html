@@ -10,6 +10,10 @@
       integrity="sha512-HK5fgLBL+xu6dm/Ii3z4xhlSUyZgTT9tuc/hSrtw6uzJOvgRr2a9jyxxT1ely+B+xFAmJKVSTbpM/CuL7qxO8w=="
       crossorigin="anonymous"
     />
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.13.0/css/all.css"
+    />
     <link rel="preconnect" href="https://fonts.gstatic.com" />
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"
@@ -19,6 +23,59 @@
   </head>
   <body>
     <div class="player">
+      <!-- Discover -->
+      <div class="discover">
+        <header>Discover New Music</header>
+        <div class="top-chart">
+          <div class="title">
+            <h2>Top-chart</h2>
+            <p>week</p>
+          </div>
+          <div class="album">
+            <div class="album-item">
+              <div
+                class="album-thumb"
+                style="
+                  background-image: url('https://e-cdns-images.dzcdn.net/images/cover/ec3c8ed67427064c70f67e5815b74cef/250x250-000000-80-0-0.jpg');
+                "
+              ></div>
+              <h4>Song name</h4>
+              <h5>singer</h5>
+            </div>
+            <div class="album-item">
+              <div
+                class="album-thumb"
+                style="
+                  background-image: url('https://e-cdns-images.dzcdn.net/images/cover/ec3c8ed67427064c70f67e5815b74cef/250x250-000000-80-0-0.jpg');
+                "
+              ></div>
+              <h4>Song name</h4>
+              <h5>singer</h5>
+            </div>
+            <div class="album-item">
+              <div
+                class="album-thumb"
+                style="
+                  background-image: url('https://e-cdns-images.dzcdn.net/images/cover/ec3c8ed67427064c70f67e5815b74cef/250x250-000000-80-0-0.jpg');
+                "
+              ></div>
+              <h4>Song name</h4>
+              <h5>singer</h5>
+            </div>
+            <div class="album-item">
+              <div
+                class="album-thumb"
+                style="
+                  background-image: url('https://e-cdns-images.dzcdn.net/images/cover/ec3c8ed67427064c70f67e5815b74cef/250x250-000000-80-0-0.jpg');
+                "
+              ></div>
+              <h4>Song name</h4>
+              <h>singer</h>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Dashboard -->
       <div class="dashboard">
         <!-- Header -->
@@ -74,13 +131,37 @@
           </div>
         </div>
 
+        <div class="volume">
+          <i class="volume-off fa fa-solid fa-volume-off"></i>
+          <input
+            id="volume-bar"
+            class="volume-bar"
+            type="range"
+            value="50"
+            step="1"
+            min="0"
+            max="100"
+          />
+          <i class="volume-up fas fa-volume-up"></i>
+        </div>
+
         <audio id="audio" src=""></audio>
       </div>
 
       <!-- Playlist -->
-      <div class="playlist"></div>
+      <div class="playlist-component">
+        <h4 class="playlist-title">Track list</h4>
+        <div class="btn btn-random">
+          <i class="fas fa-random"></i>
+        </div>
+        <div class="btn btn-repeat">
+          <i class="fas fa-redo"></i>
+        </div>
+        <div class="playlist"></div>
+      </div>
     </div>
 
-    <script src="main.js"></script>
+    <script type="module" src="./getapi.js"></script>
+    <script type="module" src="./main.js"></script>
   </body>
 </html>
