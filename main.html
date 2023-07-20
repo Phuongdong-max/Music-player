@@ -2,6 +2,10 @@
 <html lang="en">
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="connect-src 'self' https://*.spotify.com https://www.google-analytics.com https://*.ingest.sentry.io/ https://stats.g.doubleclick.net;"
+    />
     <title>Music player</title>
 
     <link
@@ -19,6 +23,14 @@
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"
       rel="stylesheet"
     />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.js"
+      integrity="sha512-NgXVRE+Mxxf647SqmbB9wPS5SEpWiLFp5G7ItUNFi+GVUyQeP+7w4vnKtc2O/Dm74TpTFKXNjakd40pfSKNulg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+
     <link rel="stylesheet" href="main.css" />
   </head>
   <body>
@@ -26,52 +38,17 @@
       <!-- Discover -->
       <div class="discover">
         <header>Discover New Music</header>
-        <div class="top-chart">
-          <div class="title">
-            <h2>Top-chart</h2>
-            <p>week</p>
+        <div class="discover-container">
+          <div class="top-chart">
+            <div class="title">
+              <h2>Top-chart</h2>
+              <p>week</p>
+            </div>
+            <div class="album"></div>
           </div>
-          <div class="album">
-            <div class="album-item">
-              <div
-                class="album-thumb"
-                style="
-                  background-image: url('https://e-cdns-images.dzcdn.net/images/cover/ec3c8ed67427064c70f67e5815b74cef/250x250-000000-80-0-0.jpg');
-                "
-              ></div>
-              <h4>Song name</h4>
-              <h5>singer</h5>
-            </div>
-            <div class="album-item">
-              <div
-                class="album-thumb"
-                style="
-                  background-image: url('https://e-cdns-images.dzcdn.net/images/cover/ec3c8ed67427064c70f67e5815b74cef/250x250-000000-80-0-0.jpg');
-                "
-              ></div>
-              <h4>Song name</h4>
-              <h5>singer</h5>
-            </div>
-            <div class="album-item">
-              <div
-                class="album-thumb"
-                style="
-                  background-image: url('https://e-cdns-images.dzcdn.net/images/cover/ec3c8ed67427064c70f67e5815b74cef/250x250-000000-80-0-0.jpg');
-                "
-              ></div>
-              <h4>Song name</h4>
-              <h5>singer</h5>
-            </div>
-            <div class="album-item">
-              <div
-                class="album-thumb"
-                style="
-                  background-image: url('https://e-cdns-images.dzcdn.net/images/cover/ec3c8ed67427064c70f67e5815b74cef/250x250-000000-80-0-0.jpg');
-                "
-              ></div>
-              <h4>Song name</h4>
-              <h>singer</h>
-            </div>
+          <div class="you-may-like">
+            <div class="title">You may like</div>
+            <div class="random-song"></div>
           </div>
         </div>
       </div>
@@ -94,70 +71,114 @@
           ></div>
         </div>
 
-        <!-- Time played -->
-        <div class="time-played">
-          <p id="time-played-start">00:00</p>
-          <p id="time-played-remaining">00 :00</p>
-        </div>
+        <!-- Wrap -->
+        <div class="wrap">
+          <!-- Time played -->
+          <div class="time-played">
+            <p id="time-played-start">00:00</p>
+            <p id="time-played-remaining">00 :00</p>
+          </div>
 
-        <!-- Progress Bar -->
-        <input
-          id="progress"
-          class="progress"
-          type="range"
-          value="0"
-          step="1"
-          min="0"
-          max="100"
-        />
-
-        <!-- Control -->
-        <div class="control">
-          <div class="btn btn-repeat">
-            <i class="fas fa-redo"></i>
-          </div>
-          <div class="btn btn-prev">
-            <i class="fas fa-step-backward"></i>
-          </div>
-          <div class="btn btn-toggle-play">
-            <i class="fas fa-pause icon-pause"></i>
-            <i class="fas fa-play icon-play"></i>
-          </div>
-          <div class="btn btn-next">
-            <i class="fas fa-step-forward"></i>
-          </div>
-          <div class="btn btn-random">
-            <i class="fas fa-random"></i>
-          </div>
-        </div>
-
-        <div class="volume">
-          <i class="volume-off fa fa-solid fa-volume-off"></i>
+          <!-- Progress Bar -->
           <input
-            id="volume-bar"
-            class="volume-bar"
+            id="progress"
+            class="progress"
             type="range"
-            value="50"
+            value="0"
             step="1"
             min="0"
             max="100"
           />
-          <i class="volume-up fas fa-volume-up"></i>
+
+          <!-- Control -->
+          <div class="control">
+            <div class="btn btn-repeat">
+              <i class="fas fa-redo"></i>
+            </div>
+            <div class="btn btn-prev">
+              <i class="fas fa-step-backward"></i>
+            </div>
+            <div class="btn btn-toggle-play">
+              <i class="fas fa-pause icon-pause"></i>
+              <i class="fas fa-play icon-play"></i>
+            </div>
+            <div class="btn btn-next">
+              <i class="fas fa-step-forward"></i>
+            </div>
+            <div class="btn btn-random">
+              <i class="fas fa-random"></i>
+            </div>
+          </div>
+
+          <div class="volume">
+            <i class="volume-off fa fa-solid fa-volume-off"></i>
+            <input
+              id="volume-bar"
+              class="volume-bar"
+              type="range"
+              value="50"
+              step="1"
+              min="0"
+              max="100"
+            />
+            <i class="volume-up fas fa-volume-up"></i>
+          </div>
         </div>
 
         <audio id="audio" src=""></audio>
       </div>
 
       <!-- Playlist -->
-      <div class="playlist-component">
+      <div class="track-list">
         <h4 class="playlist-title">Track list</h4>
-        <div class="btn btn-random">
-          <i class="fas fa-random"></i>
+        <div class="btn">
+          <button class="add-btn">Add</button>
         </div>
-        <div class="btn btn-repeat">
-          <i class="fas fa-redo"></i>
+        <div class="create-playlist">
+          <div class="create-playlist-inner">
+            <input
+              type="text"
+              id="playlist-name"
+              placeholder="Nhập tên playlist mới"
+            />
+            <button id="create-playlist-btn">Tạo playlist mới</button>
+          </div>
         </div>
-        <div class="playlist"></div>
+        <div class="btn btn-list">
+          <i class="fas fa-list"></i>
+        </div>
+        <div class="playlist">
+          <div class="song">
+            <div class="option">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+              >
+                <path
+                  d="M3.33325 5.33333H12.6666C12.8434 5.33333 13.013 5.2631 13.138 5.13807C13.263 5.01305 13.3333 4.84348 13.3333 4.66667C13.3333 4.48986 13.263 4.32029 13.138 4.19526C13.013 4.07024 12.8434 4 12.6666 4H3.33325C3.15644 4 2.98687 4.07024 2.86185 4.19526C2.73682 4.32029 2.66659 4.48986 2.66659 4.66667C2.66659 4.84348 2.73682 5.01305 2.86185 5.13807C2.98687 5.2631 3.15644 5.33333 3.33325 5.33333ZM13.9999 7.33333H1.99992C1.82311 7.33333 1.65354 7.40357 1.52851 7.5286C1.40349 7.65362 1.33325 7.82319 1.33325 8C1.33325 8.17681 1.40349 8.34638 1.52851 8.4714C1.65354 8.59643 1.82311 8.66667 1.99992 8.66667H13.9999C14.1767 8.66667 14.3463 8.59643 14.4713 8.4714C14.5963 8.34638 14.6666 8.17681 14.6666 8C14.6666 7.82319 14.5963 7.65362 14.4713 7.5286C14.3463 7.40357 14.1767 7.33333 13.9999 7.33333ZM12.6666 10.6667H3.33325C3.15644 10.6667 2.98687 10.7369 2.86185 10.8619C2.73682 10.987 2.66659 11.1565 2.66659 11.3333C2.66659 11.5101 2.73682 11.6797 2.86185 11.8047C2.98687 11.9298 3.15644 12 3.33325 12H12.6666C12.8434 12 13.013 11.9298 13.138 11.8047C13.263 11.6797 13.3333 11.5101 13.3333 11.3333C13.3333 11.1565 13.263 10.987 13.138 10.8619C13.013 10.7369 12.8434 10.6667 12.6666 10.6667Z"
+                  fill="#BDBDBD"
+                />
+              </svg>
+            </div>
+            <div class="popup-container">
+              <div class="popup">
+                div class="delete-button" id="deleteBtn_${index}"> Xóa bài hát
+              </div>
+            </div>
+
+            <div
+              class="thumb"
+              style="background-image: url('${song.image}')"
+            ></div>
+            <div class="body">
+              <h3 class="title">${song.songName}</h3>
+              <p class="author">${song.artistName}</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
