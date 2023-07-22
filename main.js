@@ -25,9 +25,13 @@ const volumeBar = $("#volume-bar");
 const deleteBtn = $(".delete-button");
 const addBtn = $(".add-btn");
 const createPlaylist = $(".create-playlist");
-const createPlaylistInner = $(".create-playlist-innert");
+const createPlaylistInner = $(".create-playlist-inner");
 const createPlaylistInput = $("#playlist-name");
 const createPlaylistBtn = $("#create-playlist-btn");
+const trackList = $("#track-list");
+const playlistList = $(".playlist-list");
+const playlistListContainer = $(".playlist-list-container");
+const btnList = $(".btn-list");
 
 const app = {
   currentIndex: 0,
@@ -49,6 +53,11 @@ const app = {
 
   savePlaylistsToLocalStorage: function () {
     localStorage.setItem("playlists", JSON.stringify(this.playlists));
+    this.playlists.forEach((playlist, index) => {
+      if (!playlist.id) {
+        playlist.id = `playlist-${index + 1}`;
+      }
+    });
   },
 
   renderPlaylists: function () {
@@ -61,7 +70,7 @@ const app = {
       `;
     });
 
-    $(".playlist-container").innerHTML = playlistHtmls.join("");
+    trackList.innerHTML = playlistHtmls.join("");
 
     const removePlaylistButtons = $$(".btn-remove-playlist");
     removePlaylistButtons.forEach((btn) => {
@@ -140,6 +149,20 @@ const app = {
       `;
     });
 
+    const playlistItems = this.playlists.map((playlist) => {
+      return `
+        <div class="playlist-item" data-playlist-id="${playlist.id}">
+          <div class="playlist-name">${playlist.name}</div>
+          <div class="playlist-actions">
+            <button class="delete-playlist-btn" data-playlist-id="${playlist.id}">Xóa</button>
+            <button class="edit-playlist-btn" data-playlist-id="${playlist.id}">Sửa</button>
+          </div>
+        </div>
+      `;
+    });
+
+    playlistListContainer.innerHTML = playlistItems.join("");
+
     $(".random-song").innerHTML = randomSongs.join("");
 
     $(".album").innerHTML = albumHtml.join("");
@@ -155,7 +178,6 @@ const app = {
   },
   handleEvents: function () {
     const _this = this;
-    const cdWidth = cd.offsetWidth;
 
     // CD spin
     const cdThumbAnimate = cdThumb.animate([{ transform: "rotate(360deg)" }], {
@@ -163,15 +185,6 @@ const app = {
       iterations: Infinity,
     });
     cdThumbAnimate.pause();
-
-    // Scroll CD
-    // document.onscroll = function () {
-    //   const scrollTop = window.scrollY || document.documentElement.scrollTop;
-    //   const newCdWidth = cdWidth - scrollTop;
-
-    //   cd.style.width = newCdWidth > 0 ? newCdWidth + "px" : 0;
-    //   cd.style.opacity = newCdWidth / cdWidth;
-    // };
 
     //When Play
     playBtn.onclick = function () {
@@ -237,19 +250,6 @@ const app = {
       const seekTime = (audio.duration / 100) * progress.value;
     }
     progress.addEventListener("input", updateProgressBar);
-
-    // Scroll Time Played
-
-    document.addEventListener("scroll", function () {
-      const scrollPosition =
-        window.scrollY || document.documentElement.scrollTop;
-      const cdHeight = cdThumb.offsetHeight;
-      if (scrollPosition < cdHeight) {
-        timePlayed.classList.remove("hidden");
-      } else {
-        timePlayed.classList.add("hidden");
-      }
-    });
 
     // Processing when Seek music
     progress.oninput = function (e) {
@@ -382,6 +382,48 @@ const app = {
         createPlaylist.classList.add("show");
       }
     });
+
+    // Processing click list playlist
+    btnList.addEventListener("click", function () {
+      playlistList.classList.toggle("show");
+    });
+    playlistList.addEventListener("click", function (e) {
+      const playlistId = e.target.closest(".playlist-item-container").dataset
+        .playlistId;
+      // TODO: Xử lý khi người dùng chọn playlist có ID là `playlistId`
+      // ...
+    });
+    playlistListContainer.addEventListener("click", function (e) {
+      if (e.target.classList.contains("delete-playlist-btn")) {
+        const playlistId = e.target.dataset.playlistId;
+        const playlistIndex = _this.playlists.findIndex(
+          (playlist) => playlist.id === playlistId
+        );
+
+        if (playlistIndex !== -1) {
+          _this.playlists.splice(playlistIndex, 1);
+          _this.savePlaylistsToLocalStorage();
+          _this.render();
+        }
+      }
+
+      if (e.target.classList.contains("edit-playlist-btn")) {
+        const playlistId = e.target.dataset.playlistId;
+        const playlistIndex = _this.playlists.findIndex(
+          (playlist) => playlist.id === playlistId
+        );
+
+        if (playlistIndex !== -1) {
+          const newPlaylistName = prompt("Nhập tên mới cho playlist:");
+          if (newPlaylistName) {
+            _this.playlists[playlistIndex].name = newPlaylistName;
+            _this.savePlaylistsToLocalStorage();
+            _this.render();
+          }
+        }
+      }
+    });
+
     // Drag drop Event
     const playlistItems = $$(".playlist .song");
     let draggedItemIndex = null;
@@ -565,4 +607,3 @@ const app = {
 };
 
 app.start();
-app.renderPlaylists();

@@ -259,6 +259,9 @@ html {
   background-size: cover;
   margin: auto;
   box-shadow: 0px 4px 8px 1px rgba(0, 0, 0, 0.08);
+
+  transform-origin: center center;
+  transition: transform 0.2s ease;
 }
 
 /* CONTROL */
@@ -379,15 +382,6 @@ html {
 }
 
 /* PLAYLIST */
-.playlist-title {
-  font-size: 24px;
-  font-style: normal;
-  font-weight: 700;
-  line-height: 110.5%;
-
-  margin-top: 21px;
-  margin-bottom: 19px;
-}
 .track-list {
   height: 100%;
 }
@@ -416,7 +410,65 @@ html {
   border-radius: 5px;
   cursor: pointer;
 }
+.playlist-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: none;
+}
 
+.playlist-list-container {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.playlist-list.show {
+  display: flex;
+}
+
+.playlist-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  padding: 8px;
+  border-bottom: 1px solid #ccc;
+}
+
+.playlist-name {
+  font-size: 16px;
+  font-weight: 500;
+  margin-right: 30px;
+}
+
+.playlist-actions {
+  display: flex;
+}
+
+.delete-playlist-btn,
+.edit-playlist-btn {
+  padding: 5px 10px;
+  margin-left: 5px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.edit-playlist-btn {
+  background-color: #4caf50;
+}
 .create-playlist {
   display: flex;
   justify-content: center;
