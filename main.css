@@ -26,11 +26,31 @@ html {
 
 @keyframes marquee {
   0% {
-    text-indent: 150%; /* Di chuyển văn bản sang phải, ẩn hết bên trái */
+    text-indent: 150%;
   }
   100% {
-    text-indent: -50%; /* Quay lại vị trí ban đầu từ bên phải */
+    text-indent: -50%;
   }
+}
+
+/* custom scrollbar */
+::-webkit-scrollbar {
+  width: 20px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #d6dee1;
+  border-radius: 20px;
+  border: 6px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #27ae5f2d;
 }
 
 .player {
@@ -62,7 +82,7 @@ html {
 
 .discover header {
   margin-top: 18px;
-  margin-bottom: 40px;
+  margin-bottom: 10px;
   font-size: 32px;
 
   font-style: normal;
@@ -71,6 +91,97 @@ html {
   text-align: left;
 }
 
+.search-wrap {
+  position: relative;
+}
+
+.search {
+  width: 100%;
+  position: relative;
+  display: flex;
+  margin-bottom: 10px;
+  height: 30px;
+  border-radius: 10px;
+  border: 1px solid #d6dee18a;
+  outline: none;
+  color: #9dbfaf;
+}
+
+.search:focus {
+  color: #333;
+}
+
+.searchTerm {
+  width: 100%;
+  padding-left: 35px;
+  border-width: 0;
+}
+
+.searchButton {
+  position: absolute;
+  top: 2px;
+  left: -4px;
+
+  width: 40px;
+  height: 30px;
+  text-align: center;
+  color: #d6dee1;
+  font-size: 15px;
+  border: 0px;
+}
+
+.search-hint {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #fff;
+  width: 100%;
+  border-radius: 3px;
+  padding: 0;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+}
+
+.search-item {
+  display: flex;
+  align-items: center;
+  margin: 5px 0;
+}
+
+.search-thump {
+  width: 35px;
+  height: 35px;
+  background-position: center center;
+  background-size: cover;
+  border-radius: 6px;
+  box-shadow: 0px 4px 8px 1px rgba(0, 0, 0, 0.08);
+  margin: 0 8px;
+}
+
+.search-title h5 {
+  width: 220px;
+  color: var(--gray-1, #333);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: block;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 110.5%;
+}
+
+.search-title h6 {
+  width: 220px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: block;
+  color: var(--gray-2, #4f4f4f);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 110.5%;
+}
 .discover-container {
   /* overflow: auto; */
 }
@@ -141,7 +252,7 @@ html {
 }
 
 .random-song {
-  height: calc(100vh - 566px);
+  height: calc(100vh - 586px);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -392,18 +503,28 @@ html {
 
 .track-list .btn {
   display: inline;
-  margin-left: 19px;
+  margin-right: 10px;
 }
 
-.playlist {
+.track-list {
+  min-width: 256px;
   max-width: 308px;
-  height: calc(100vh - 100px);
-  overflow-y: auto;
   padding: 12px;
+}
+
+.playlist-title {
+  color: var(--gray-1, #333);
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 110.5%;
+  margin-top: 21px;
+  margin-bottom: 12px;
 }
 
 .add-btn {
   padding: 5px 10px;
+  margin-bottom: 12px;
   background-color: #4caf50;
   color: white;
   border: none;
@@ -508,6 +629,22 @@ html {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+}
+
+.playlist-heading {
+  color: var(--gray-3, #828282);
+  font-family: Poppins;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 110.5%;
+
+  margin-bottom: 12px;
+}
+
+.playlist {
+  height: calc(100vh - 138px);
+  overflow-y: auto;
 }
 
 .song {

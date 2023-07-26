@@ -37,7 +37,7 @@ const fetchRandomAlbums = async () => {
     const albumsResponse = await axios.get(options.url, {
       headers: options.headers,
     });
-    const albums = albumsResponse.data.albums.items; // Lưu trữ mảng album gốc
+    const albums = albumsResponse.data.albums.items;
 
     const randomAlbums = [];
     for (let i = 0; i < 4; i++) {
@@ -47,11 +47,11 @@ const fetchRandomAlbums = async () => {
         image: album.images[0].url,
         albumName: album.name,
         artistName: album.artists[0].name,
+        id: album.id,
       };
       randomAlbums.push(albumObject);
       albums.splice(randomIndex, 1);
     }
-
     return randomAlbums;
   } catch (error) {
     console.error(error);
@@ -90,7 +90,7 @@ const fetchRandomSongs = async () => {
     const songsResponse = await axios.get(options.url, {
       headers: options.headers,
     });
-    const songs = songsResponse.data.tracks.items; // Lưu trữ mảng bài hát gốc
+    const songs = songsResponse.data.tracks.items;
 
     const randomSongs = [];
     for (let i = 0; i < 10; i++) {
@@ -118,7 +118,6 @@ const fetchRandomSongs = async () => {
       }
       songs.splice(randomIndex, 1);
     }
-
     return randomSongs;
   } catch (error) {
     console.error(error);
@@ -126,9 +125,113 @@ const fetchRandomSongs = async () => {
   }
 };
 
-// Create Playlist
+// Search Song
+const searchBar = document.getElementById("searchTerm");
+let searchTimeout;
+searchBar.addEventListener("input", async () => {
+  clearTimeout(searchTimeout);
+  if (searchBar !== "") {
+    const searchBarText = searchBar.value;
+    searchTimeout = setTimeout(async () => {
+      await fetchSearch(searchBarText);
+    }, 500);
+  }
+});
+
+const fetchSearch = async (searchTerm) => {
+  try {
+    if (searchTerm.trim() === "") {
+      return [];
+    }
+    const token = await fetchToken();
+
+    const options = {
+      url: `https://api.spotify.com/v1/search?q=${encodeURIComponent(
+        searchTerm
+      )}&type=track&limit=5&include_external=audio`,
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    };
+    const response = await axios.get(options.url, {
+      headers: options.headers,
+    });
+    const searchSong = [];
+
+    for (let i = 0; i < 5; i++) {
+      const songs = response.data.tracks.items;
+      const song = songs[i];
+      const songObject = {
+        image: song.album.images[0].url,
+        songName: song.name,
+        artistName: song.artists[0].name,
+        preview: song.preview_url,
+        id: song.id,
+      };
+      searchSong.push(songObject);
+    }
+    return searchSong;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+// Album
+
+const fetchAlbum = async (albumId) => {
+  try {
+    const token = await fetchToken();
+
+    const albumUrl = `https://api.spotify.com/v1/albums/${albumId}`;
+
+    const options = {
+      url: albumUrl,
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    };
+
+    const response = await axios.get(albumUrl, {
+      headers: options.headers,
+    });
+
+    const ids = [];
+    const length = response.data.tracks.items.length;
+
+    for (let i = 0; i < length; i++) {
+      const songs = response.data.tracks.items;
+      const song = songs[i];
+      ids.push(song.id);
+    }
+    return ids;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+// get song details
+const fetchSongDetails = async (songId) => {
+  try {
+    const token = await fetchToken();
+
+    const songUrl = `https://api.spotify.com/v1/tracks/${songId}`;
+
+    const headers = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    const response = await axios.get(songUrl, { headers });
+
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
 
 const randomAlbums = await fetchRandomAlbums();
 const randomSongs = await fetchRandomSongs();
 
-export { randomAlbums, randomSongs };
+export { randomAlbums, randomSongs, fetchSearch, fetchAlbum, fetchSongDetails };

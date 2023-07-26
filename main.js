@@ -1,10 +1,18 @@
-import { randomAlbums, randomSongs } from "./getapi.js";
+import {
+  randomAlbums,
+  randomSongs,
+  fetchSearch,
+  fetchAlbum,
+  fetchSongDetails,
+} from "./getapi.js";
 
 const $ = document.querySelector.bind(document);
 const $$ = document.querySelectorAll.bind(document);
 const PLAYER_STORAGE_KEY = "key_player";
 
 const player = $(".player");
+const searchHint = $(".search-hint");
+const searchTerm = $(".searchTerm");
 const album = $(".album");
 const randomSong = $(".random-song");
 const playlist = $(".playlist");
@@ -32,6 +40,7 @@ const trackList = $("#track-list");
 const playlistList = $(".playlist-list");
 const playlistListContainer = $(".playlist-list-container");
 const btnList = $(".btn-list");
+const playlistHeading = $(".playlist-heading");
 
 const app = {
   currentIndex: 0,
@@ -41,6 +50,7 @@ const app = {
   selectedOption: null,
   config: JSON.parse(localStorage.getItem(PLAYER_STORAGE_KEY)) || {},
   songs: [],
+  activePlaylistId: null,
 
   Albums: randomAlbums,
   randomSongs: randomSongs,
@@ -53,34 +63,7 @@ const app = {
 
   savePlaylistsToLocalStorage: function () {
     localStorage.setItem("playlists", JSON.stringify(this.playlists));
-    this.playlists.forEach((playlist, index) => {
-      if (!playlist.id) {
-        playlist.id = `playlist-${index + 1}`;
-      }
-    });
-  },
-
-  renderPlaylists: function () {
-    const playlistHtmls = this.playlists.map((playlist, index) => {
-      return `
-        <div class="playlist-item">
-          <div class="playlist-name">${playlist.name}</div>
-          <button class="btn-remove-playlist" data-index="${index}">Xóa</button>
-        </div>
-      `;
-    });
-
-    trackList.innerHTML = playlistHtmls.join("");
-
-    const removePlaylistButtons = $$(".btn-remove-playlist");
-    removePlaylistButtons.forEach((btn) => {
-      btn.onclick = () => {
-        const indexToRemove = parseInt(btn.dataset.index);
-        this.playlists.splice(indexToRemove, 1);
-        this.savePlaylistsToLocalStorage();
-        this.renderPlaylists();
-      };
-    });
+    this.playlists = JSON.parse(localStorage.getItem("playlists")) || [];
   },
   render: function () {
     const htmls = this.songs.map((song, index) => {
@@ -101,7 +84,7 @@ const app = {
               : ""
           }">
         <div class="popup">
-          <div class="delete-button")">
+          <div class="delete-button" data-index="${index}">
             Xóa bài hát
           </div>
         </div>
@@ -123,7 +106,7 @@ const app = {
     });
     const albumHtml = this.Albums.map((album, index) => {
       return `
-    <div class="album-item">
+    <div class="album-item" data-index='${album.id}'>
       <div class="album-thumb" style="background-image: url('${album.image}');"></div>
       <h4>${album.albumName}</h4>
       <h5>${album.artistName}</h5>
@@ -161,18 +144,53 @@ const app = {
       `;
     });
 
+    const currentPlaylist = this.playlists.find(
+      (playlist) => playlist.id === this.activePlaylistId
+    );
+    const playlistHeading = $(".playlist-heading");
+    if (currentPlaylist) {
+      playlistHeading.textContent = currentPlaylist.name;
+    } else {
+      playlistHeading.textContent = "Playlist Name";
+    }
+
     playlistListContainer.innerHTML = playlistItems.join("");
 
-    $(".random-song").innerHTML = randomSongs.join("");
+    randomSong.innerHTML = randomSongs.join("");
 
-    $(".album").innerHTML = albumHtml.join("");
+    album.innerHTML = albumHtml.join("");
 
-    $(".playlist").innerHTML = htmls.join("");
+    playlist.innerHTML = htmls.join("");
+  },
+  renderSearch: function (searchItem) {
+    const searchHtml = searchItem.map((song) => {
+      return `
+      <div class="search-item" data-index='${song.id}'>
+      <div
+        class="search-thump"
+        style="
+          background-image: url('${song.image}');
+        "
+      ></div>
+      <div class="search-title">
+        <h5>${song.songName}</h5>
+        <h6>${song.artistName}</h6>
+      </div>
+    </div>
+      `;
+    });
+
+    searchHint.innerHTML = searchHtml.join("");
   },
   defineProperties: function () {
+    const _this = this;
+
     Object.defineProperty(this, "currentSong", {
       get: function () {
-        return this.songs[this.currentIndex];
+        return _this.songs[_this.currentIndex];
+      },
+      set: function (value) {
+        _this.currentIndex = _this.songs.findIndex((song) => song === value);
       },
     });
   },
@@ -310,7 +328,7 @@ const app = {
       createPlaylist.classList.add("show");
     };
 
-    // Processing click playlist
+    // Processing click on playlist
     playlist.onclick = function (e) {
       const songNode = e.target.closest(".song:not(.active)");
       const optionNode = e.target.closest(".option");
@@ -345,17 +363,23 @@ const app = {
       const deleteBtn = e.target.closest(".delete-button");
       if (deleteBtn) {
         e.preventDefault();
-        const songIndexToRemove = Number(deleteBtn.id.split("_")[1]);
+        const songIndexToRemove = Number(deleteBtn.dataset.index);
+        console.log(deleteBtn.dataset);
+        console.log(deleteBtn.dataset.index);
+
         _this.removeFromPlaylist(songIndexToRemove);
         audio.play();
       }
     };
 
-    // Processing event click "Tạo playlist mới"
+    // Processing event click "Add new playlist"
     createPlaylistBtn.onclick = function () {
       const playlistName = createPlaylistInput.value.trim();
       if (playlistName !== "") {
         const newPlaylist = {
+          id:
+            Math.random().toString(36).substring(2, 15) +
+            Math.random().toString(36).substring(2, 15),
           name: playlistName,
           songs: [],
         };
@@ -364,18 +388,21 @@ const app = {
 
         _this.savePlaylistsToLocalStorage();
 
-        _this.renderPlaylists();
-
         createPlaylist.classList.remove("show");
 
         createPlaylistInput.value = "";
+
+        _this.activePlaylistId = newPlaylist.id;
+        _this.songs = newPlaylist.songs;
+        _this.setConfig("activePlaylistId", newPlaylist.id);
+
+        _this.render();
       }
     };
 
     //Processing event click over create-playlist
     document.addEventListener("click", function (event) {
       if (!event.target.closest(".create-playlist-inner")) {
-        console.log("none");
         createPlaylist.classList.remove("show");
       }
       if (event.target === addBtn) {
@@ -384,27 +411,27 @@ const app = {
     });
 
     // Processing click list playlist
-    btnList.addEventListener("click", function () {
-      playlistList.classList.toggle("show");
-    });
-    playlistList.addEventListener("click", function (e) {
-      const playlistId = e.target.closest(".playlist-item-container").dataset
-        .playlistId;
-      // TODO: Xử lý khi người dùng chọn playlist có ID là `playlistId`
-      // ...
-    });
+
     playlistListContainer.addEventListener("click", function (e) {
       if (e.target.classList.contains("delete-playlist-btn")) {
         const playlistId = e.target.dataset.playlistId;
         const playlistIndex = _this.playlists.findIndex(
           (playlist) => playlist.id === playlistId
         );
+        const currentPlaylist = _this.playlists[playlistIndex].name;
+        const shouldDelete = confirm(
+          `Are you sure you want to delete the playlist  "${currentPlaylist}"?`
+        );
 
-        if (playlistIndex !== -1) {
+        if (shouldDelete && playlistIndex !== -1) {
           _this.playlists.splice(playlistIndex, 1);
           _this.savePlaylistsToLocalStorage();
+
           _this.render();
         }
+        setTimeout(() => {
+          playlistList.classList.add("show");
+        }, 100);
       }
 
       if (e.target.classList.contains("edit-playlist-btn")) {
@@ -414,13 +441,54 @@ const app = {
         );
 
         if (playlistIndex !== -1) {
-          const newPlaylistName = prompt("Nhập tên mới cho playlist:");
+          const newPlaylistName = prompt("Enter a new name for the playlist:");
           if (newPlaylistName) {
             _this.playlists[playlistIndex].name = newPlaylistName;
             _this.savePlaylistsToLocalStorage();
             _this.render();
           }
         }
+      }
+
+      const playlistItems = e.target.closest(".playlist-item");
+      if (playlistItems) {
+        const playlistId = playlistItems.dataset.playlistId;
+        _this.activePlaylistId = playlistId;
+        const selectedPlaylist = _this.playlists.find(
+          (playlist) => playlist.id === playlistId
+        );
+        if (selectedPlaylist) {
+          _this.songs = selectedPlaylist.songs;
+          _this.setConfig("activePlaylistId", playlistId);
+          _this.loadCurrentPlaylist();
+          _this.render();
+          playlistList.classList.remove("show");
+        }
+      }
+    });
+
+    //Processing event click over playlistList
+    const btnListBf = $(".fa-list");
+    document.addEventListener("click", function (event) {
+      if (!event.target.closest(".playlist-list-container")) {
+        playlistList.classList.remove("show");
+      }
+      if (event.target === btnListBf) {
+        playlistList.classList.add("show");
+      }
+    });
+
+    // Search bar
+
+    searchTerm.addEventListener("input", async () => {
+      const searchBarText = searchTerm.value;
+      const searchItem = await fetchSearch(searchBarText);
+      _this.renderSearch(searchItem);
+    });
+    document.addEventListener("click", function (event) {
+      if (!event.target.closest(".search-hint")) {
+        searchHint.innerHTML = "";
+        _this.render;
       }
     });
 
@@ -459,7 +527,7 @@ const app = {
           items.splice(draggedItemIndex, 1);
           items.splice(dropIndex, 0, draggedItem);
           app.currentIndex = dropIndex;
-          app.savePlaylistToLocalStorage();
+          app.savePlaylistsToLocalStorage();
           app.render();
         }
         item.classList.remove("dragging");
@@ -478,11 +546,96 @@ const app = {
       const id = randomSongNode.dataset.index;
       const songToAdd = randomSongs.find((song) => song.id === id);
       _this.songs.push(songToAdd);
+      _this.addToPlaylist(songToAdd);
       _this.currentIndex = _this.songs.length - 1;
       _this.loadCurrentSong();
-      _this.savePlaylistToLocalStorage();
+      _this.savePlaylistsToLocalStorage();
       _this.render();
       audio.play();
+    };
+
+    // Listener click on search song
+    searchHint.onclick = async (e) => {
+      const searchSongNode = e.target.closest(".search-item");
+      const searchItem = await fetchSearch(searchTerm.value);
+      const id = searchSongNode.dataset.index;
+      const songToAdd = searchItem.find((song) => song.id === id);
+      _this.songs.push(songToAdd);
+      _this.addToPlaylist(songToAdd);
+      _this.currentIndex = _this.songs.length - 1;
+      _this.loadCurrentSong();
+      _this.savePlaylistsToLocalStorage();
+      _this.render();
+      searchHint.innerHTML = "";
+      searchTerm.value = "";
+      audio.play();
+    };
+
+    // Listener click on album
+    album.onclick = async (e) => {
+      const albumNode = e.target.closest(".album-item");
+      const id = albumNode.dataset.index;
+      const listId = await fetchAlbum(id);
+
+      const songDetails = await Promise.all(
+        listId.map(async (songId) => {
+          try {
+            const songInfo = await fetchSongDetails(songId);
+            return {
+              image: songInfo.album.images[0].url,
+              songName: songInfo.name,
+              artistName: songInfo.artists[0].name,
+              preview: songInfo.preview_url,
+              id: songInfo.id,
+            };
+          } catch (error) {
+            console.error("Error fetching song details:", error);
+            return {
+              image: "",
+              songName: "Unknown",
+              artistName: "Unknown",
+              preview: "",
+              id: songId,
+            };
+          }
+        })
+      );
+
+      const songFilter = songDetails.filter(
+        (song) => song.preview != undefined
+      );
+
+      if (songFilter.length > 0) {
+        const findAlbum = _this.Albums.find((album) => album.id === id);
+        const newPlaylist = {
+          id: id,
+          name: findAlbum.albumName,
+          songs: songFilter,
+        };
+        _this.playlists.push(newPlaylist);
+        _this.savePlaylistsToLocalStorage();
+
+        const currentSong = _this.currentSong;
+        _this.activePlaylistId = id;
+        _this.setConfig("activePlaylistId", newPlaylist.id);
+        _this.songs = newPlaylist.songs;
+
+        if (currentSong) {
+          _this.currentIndex = newPlaylist.songs.findIndex(
+            (song) => song.id === currentSong.id
+          );
+        } else {
+          _this.currentIndex = 0;
+        }
+
+        _this.loadCurrentPlaylist();
+        _this.render();
+        this.nextSong();
+        audio.play();
+      } else {
+        alert("This song does not have a preview available.");
+        console.log("This Album have song preview not available.");
+      }
     };
 
     // Volume bar
@@ -508,14 +661,24 @@ const app = {
 
   loadCurrentSong: function () {
     if (this.currentSong) {
-      heading.textContent = this.currentSong.songName;
+      heading.textContent = `${this.currentSong.songName}  -  ${this.currentSong.artistName}`;
       cdThumb.style.backgroundImage = `url('${this.currentSong.image}')`;
       audio.src = this.currentSong.preview;
+    }
+  },
+  loadCurrentPlaylist: function () {
+    const playlist = this.playlists.find(
+      (playlist) => playlist.id === this.activePlaylistId
+    );
+
+    if (playlist) {
+      this.songs = playlist.songs;
     }
   },
   loadConfig: function () {
     this.isRandom = this.config.isRandom;
     this.isRepeat = this.config.isRepeat;
+    this.activePlaylistId = this.config.activePlaylistId;
 
     const playlistData = localStorage.getItem("playlist");
     if (playlistData) {
@@ -523,28 +686,39 @@ const app = {
     }
   },
   addToPlaylist: function (songToAdd) {
-    const existingSongIndex = this.songs.findIndex(
-      (song) => song.id === songToAdd.id
+    const playlist = this.playlists.find(
+      (playlist) => playlist.id === this.activePlaylistId
     );
 
-    if (existingSongIndex === -1) {
-      this.songs.push(songToAdd);
-      this.savePlaylistToLocalStorage();
-      this.render();
-    } else {
-      // Nếu bài hát đã tồn tại, hiển thị thông báo hoặc thực hiện các tác vụ khác
-      // (ví dụ: thông báo "Bài hát đã tồn tại trong danh sách")
-      // ...
+    if (playlist) {
+      const existingSongIndex = playlist.songs.findIndex(
+        (song) => song.id === songToAdd.id
+      );
+
+      if (existingSongIndex === -1) {
+        playlist.songs.push(songToAdd);
+        this.nextSong();
+        this.savePlaylistsToLocalStorage();
+        this.render();
+      }
     }
   },
   removeFromPlaylist: function (indexToRemove) {
-    this.songs.splice(indexToRemove, 1);
-    this.savePlaylistToLocalStorage();
-    this.nextSong();
-    this.render();
-  },
-  savePlaylistToLocalStorage: function () {
-    localStorage.setItem("playlist", JSON.stringify(this.songs));
+    const playlist = this.playlists.find(
+      (playlist) => playlist.id === this.activePlaylistId
+    );
+
+    if (playlist && Array.isArray(playlist.songs)) {
+      const tempCurrentIndex = this.currentIndex;
+      playlist.songs.splice(indexToRemove, 1);
+      this.currentIndex =
+        tempCurrentIndex < indexToRemove
+          ? tempCurrentIndex
+          : tempCurrentIndex - 1;
+      this.songs.splice(indexToRemove, 1);
+      this.savePlaylistsToLocalStorage();
+      this.render();
+    }
   },
   nextSong: function () {
     this.currentIndex++;
@@ -552,7 +726,7 @@ const app = {
       this.currentIndex = 0;
     }
     this.loadCurrentSong();
-    this.savePlaylistToLocalStorage();
+    this.savePlaylistsToLocalStorage();
   },
   prevSong: function () {
     this.currentIndex--;
@@ -560,7 +734,7 @@ const app = {
       this.currentIndex = this.songs.length - 1;
     }
     this.loadCurrentSong();
-    this.savePlaylistToLocalStorage();
+    this.savePlaylistsToLocalStorage();
   },
   playRandomSong: function () {
     let newIndex;
@@ -569,18 +743,43 @@ const app = {
     } while (newIndex === this.currentIndex);
     this.currentIndex = newIndex;
     this.loadCurrentSong();
-    this.savePlaylistToLocalStorage();
+    this.savePlaylistsToLocalStorage();
   },
 
   start: function () {
     this.loadConfig();
-
     this.defineProperties();
-
     this.handleEvents();
-
     this.loadCurrentSong();
 
+    if (this.playlists.length === 0) {
+      const newPlaylist = {
+        id: "newplaylist",
+        name: "New Playlist",
+        songs: [],
+      };
+      this.playlists.push(newPlaylist);
+      this.activePlaylistId = "newplaylist";
+      this.savePlaylistsToLocalStorage();
+    }
+
+    if (this.playlists.length > 0 && this.activePlaylistId) {
+      const activePlaylist = this.playlists.find(
+        (playlist) => playlist.id === this.activePlaylistId
+      );
+
+      if (activePlaylist) {
+        this.activePlaylistId = this.activePlaylistId;
+      } else {
+        this.activePlaylistId = this.playlists[0].id;
+      }
+    } else {
+      this.activePlaylistId = this.playlists[0].id;
+    }
+
+    this.songs =
+      this.playlists.find((playlist) => playlist.id === this.activePlaylistId)
+        ?.songs || [];
     this.render();
 
     if (this.songs.length === 0) {
@@ -600,9 +799,6 @@ const app = {
       audio.volume = this.config.volume || 0.5;
       volumeBar.value = audio.volume * 100;
     }
-
-    randomBtn.classList.toggle("active", this.isRandom);
-    repeatBtn.classList.toggle("active", this.isRepeat);
   },
 };
 
