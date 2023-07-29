@@ -363,11 +363,8 @@ const app = {
       if (deleteBtn) {
         e.preventDefault();
         const songIndexToRemove = Number(deleteBtn.dataset.index);
-        console.log(deleteBtn.dataset);
-        console.log(deleteBtn.dataset.index);
-
-        _this.removeFromPlaylist(songIndexToRemove);
         _this.nextSong();
+        _this.removeFromPlaylist(songIndexToRemove);
         audio.play();
       }
     };
@@ -763,6 +760,7 @@ const app = {
           ? tempCurrentIndex
           : tempCurrentIndex - 1;
       this.songs.splice(indexToRemove, 1);
+      this.currentIndex = indexToRemove;
       this.savePlaylistsToLocalStorage();
       this.render();
     }
