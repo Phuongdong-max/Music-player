@@ -1,6 +1,6 @@
 # Music Player Web App
 
-![Music Player]([https://your-image-link.png](https://ibb.co/Zcj6ZfX))
+![Music Player]([url=https://ibb.co/Zcj6ZfX][img]https://i.ibb.co/Zcj6ZfX/mp.png[/img][/url]))
 
 ## Introduction
 
