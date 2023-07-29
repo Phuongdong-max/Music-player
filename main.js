@@ -367,6 +367,7 @@ const app = {
         console.log(deleteBtn.dataset.index);
 
         _this.removeFromPlaylist(songIndexToRemove);
+        _this.nextSong();
         audio.play();
       }
     };
