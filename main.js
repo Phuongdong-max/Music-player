@@ -36,7 +36,6 @@ const createPlaylist = $(".create-playlist");
 const createPlaylistInner = $(".create-playlist-inner");
 const createPlaylistInput = $("#playlist-name");
 const createPlaylistBtn = $("#create-playlist-btn");
-const trackList = $("#track-list");
 const playlistList = $(".playlist-list");
 const playlistListContainer = $(".playlist-list-container");
 const btnList = $(".btn-list");
@@ -137,8 +136,8 @@ const app = {
         <div class="playlist-item" data-playlist-id="${playlist.id}">
           <div class="playlist-name">${playlist.name}</div>
           <div class="playlist-actions">
-            <button class="delete-playlist-btn" data-playlist-id="${playlist.id}">Xóa</button>
-            <button class="edit-playlist-btn" data-playlist-id="${playlist.id}">Sửa</button>
+            <button class="delete-playlist-btn" data-playlist-id="${playlist.id}">Delete</button>
+            <button class="edit-playlist-btn" data-playlist-id="${playlist.id}">Edit</button>
           </div>
         </div>
       `;
@@ -648,6 +647,53 @@ const app = {
           rgb(219, 219, 219) ${volumeBar.value}%
         )`;
       volumeBar.style.background = color;
+    });
+
+    // Mobile
+    const dashboard = $(".dashboard");
+    const dashboardSvg = $("#nav-dashboard-svg");
+    const trackList = $(".track-list");
+    const trackListSvg = $("#nav-playlist-svg");
+    const discover = $(".discover");
+    const discoverSvg = $("#nav-discover-svg");
+    const nav = $(".nav");
+
+    discover.classList.add("active");
+    discoverSvg.querySelector("path").setAttribute("fill", "#27ae60");
+
+    nav.addEventListener("click", function (event) {
+      if (
+        event.target.classList.contains("nav-dashboard") ||
+        event.target.parentElement.classList.contains("nav-dashboard")
+      ) {
+        trackList.classList.remove("active");
+        trackListSvg.querySelector("path").setAttribute("fill", "#BDBDBD");
+        discover.classList.remove("active");
+        discoverSvg.querySelector("path").setAttribute("fill", "#BDBDBD");
+        dashboard.classList.add("active");
+        dashboardSvg.querySelector("path").setAttribute("fill", "#27ae60");
+      } else if (
+        event.target.classList.contains("nav-playlist") ||
+        event.target.parentElement.classList.contains("nav-playlist")
+      ) {
+        discover.classList.remove("active");
+        discoverSvg.querySelector("path").setAttribute("fill", "#BDBDBD");
+        dashboard.classList.remove("active");
+        dashboardSvg.querySelector("path").setAttribute("fill", "#BDBDBD");
+        trackList.classList.add("active");
+        trackListSvg.querySelector("path").setAttribute("fill", "#27ae60");
+      } else if (
+        event.target.classList.contains("nav-discover") ||
+        event.target.parentElement.classList.contains("nav-discover")
+      ) {
+        dashboard.classList.remove("active");
+        dashboardSvg.querySelector("path").setAttribute("fill", "#BDBDBD");
+        trackList.classList.remove("active");
+        trackListSvg.querySelector("path").setAttribute("fill", "#BDBDBD");
+        discover.classList.add("active");
+        discoverSvg.querySelector("path").setAttribute("fill", "#27ae60");
+      }
+      _this.render();
     });
   },
   scrollToActiveSong: function () {

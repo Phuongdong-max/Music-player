@@ -751,3 +751,99 @@ html {
   visibility: hidden;
   transition: opacity 0.3s ease-in-out;
 }
+
+/* Mobile */
+@media only screen and (max-width: 46.1875em) {
+  .player {
+    height: 100vh;
+  }
+  .dashboard {
+    display: none;
+    margin-top: 50px;
+    position: fixed;
+    bottom: 0;
+    width: 98%;
+    padding: 0;
+    padding-bottom: 101px;
+  }
+
+  .discover {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    width: 98%;
+    padding: 0;
+    padding-bottom: 101px;
+  }
+  .random-song {
+    height: calc(100vh - 687px);
+  }
+  .album {
+    max-width: 100%;
+  }
+
+  .track-list {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    padding: 0;
+    padding-bottom: 101px;
+  }
+  .playlist {
+    height: calc(100vh - 239px);
+  }
+
+  .nav {
+    display: flex;
+    width: 319px;
+    height: 60px;
+    padding: 0px 16px;
+    justify-content: space-around;
+    align-items: center;
+    padding-bottom: 51px;
+
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #fff;
+  }
+  .nav div {
+    padding: 20px;
+  }
+
+  .discover.active,
+  .track-list.active {
+    display: block;
+  }
+  .dashboard.active {
+    display: flex;
+  }
+}
+
+/* Tablet */
+@media only screen and (min-width: 46.25em) and (max-width: 63.9375) {
+  .nav {
+    display: none;
+  }
+  .player {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .discover {
+    flex: 0 0 50%;
+  }
+
+  .dashboard,
+  .track-list {
+    flex-basis: 100%;
+  }
+}
+
+/* Pc */
+@media only screen and (min-width: 64em) {
+  .nav {
+    display: none;
+  }
+}
