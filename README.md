@@ -1,6 +1,6 @@
 # Music Player Web App
 
-![Music Player](https://ibb.co/Zcj6ZfX)
+![Music Player](https://i.postimg.cc/bYS3Cwxf/mp.png)
 
 ## Introduction
 
