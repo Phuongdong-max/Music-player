@@ -403,6 +403,7 @@ const app = {
         createPlaylist.classList.remove("show");
       }
       if (event.target === addBtn) {
+        console.log(event.target);
         createPlaylist.classList.add("show");
       }
     });
@@ -458,7 +459,9 @@ const app = {
           _this.songs = selectedPlaylist.songs;
           _this.setConfig("activePlaylistId", playlistId);
           _this.loadCurrentPlaylist();
+          _this.loadCurrentSong();
           _this.render();
+          audio.play();
           playlistList.classList.remove("show");
         }
       }
