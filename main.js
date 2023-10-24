@@ -84,7 +84,7 @@ const app = {
           }">
         <div class="popup">
           <div class="delete-button" data-index="${index}">
-            Xóa bài hát
+            Delete thís song
           </div>
         </div>
       </div>

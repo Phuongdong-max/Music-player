@@ -147,6 +147,11 @@ html {
   margin: 5px 0;
 }
 
+.search-item:hover {
+  background-color: #4caf4fe8;
+  cursor: pointer;
+}
+
 .search-thump {
   width: 35px;
   height: 35px;
@@ -268,6 +273,12 @@ html {
   padding: 10px;
   border-radius: 5px;
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+  
+}
+
+.random-song .item:hover{
+  background-color: #4caf4fe8;
+  cursor: pointer;
 }
 
 .random-song .item-thumb {
@@ -550,7 +561,7 @@ html {
   border-radius: 10px;
   padding: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  width: 90%;
+  width: 50%;
 }
 
 .playlist-list.show {
@@ -619,7 +630,6 @@ html {
 }
 
 .create-playlist-inner {
-  width: 90%;
   background-color: #fff;
   padding: 20px;
   border-radius: 5px;
@@ -669,6 +679,11 @@ html {
   padding: 8px 16px;
   border-radius: 5px;
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+}
+
+.song:hover{
+  background-color: #4caf4fe8;
+  cursor: pointer;
 }
 
 .song[draggable="true"] {
@@ -847,7 +862,6 @@ html {
   .discover {
     flex: 0 0 50%;
   }
-
   .dashboard,
   .track-list {
     flex-basis: 100%;
